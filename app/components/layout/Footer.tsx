@@ -40,7 +40,7 @@ const Footer = () => {
           </a>
 
           <a
-            href="https://github.com/chapmanio/movies-react"
+            href="https://github.com/chapmanio/movies-remix"
             className="text-gray-400 hover:text-gray-500"
           >
             <span className="sr-only">GitHub</span>
