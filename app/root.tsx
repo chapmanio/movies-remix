@@ -1,11 +1,68 @@
-import { Links, LinksFunction, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from 'remix';
+import {
+  json,
+  Links,
+  LinksFunction,
+  LiveReload,
+  LoaderFunction,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useLoaderData,
+} from 'remix';
 import type { MetaFunction } from 'remix';
 
 import Footer from './components/layout/Footer';
+import ListModal from './components/lists/ListModal';
+
+import { ListProvider } from './hooks/useList';
+import { ListModalProvider } from './hooks/useListModal';
+import { UserProvider } from './hooks/useUser';
+
+import { authUser, AuthUser } from './lib/api/auth';
+import { getAllLists } from './lib/api/lists';
+import type { List } from './lib/api/types';
 
 import styles from './tailwind.css';
 
+// Types
+type LoaderData = {
+  authUser: AuthUser;
+  lists: List[] | undefined;
+};
+
 // Remix
+export const loader: LoaderFunction = async ({ request }) => {
+  // Build headers with any cookies
+  const headers = new Headers();
+
+  headers.set('Cookie', request.headers.get('Cookie') || '');
+
+  // Get logged in user
+  let user: AuthUser;
+
+  try {
+    user = await authUser(headers);
+  } catch (error) {
+    user = { auth: false };
+  }
+
+  // Get lists if logged in
+  let lists: List[] | undefined;
+
+  if (user.auth) {
+    lists = await getAllLists(headers);
+  }
+
+  // Handle response
+  const data: LoaderData = {
+    authUser: user,
+    lists,
+  };
+
+  return json(data);
+};
+
 export const links: LinksFunction = () => {
   return [
     {
@@ -42,6 +99,10 @@ export const meta: MetaFunction = () => ({
 
 // React
 export default function App() {
+  // Hooks
+  const { authUser, lists } = useLoaderData<LoaderData>();
+
+  // Render
   return (
     <html lang="en">
       <head>
@@ -49,9 +110,16 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <Outlet />
+        <UserProvider initialState={authUser}>
+          <ListProvider initialState={{ lists }}>
+            <ListModalProvider>
+              <Outlet />
 
-        <Footer />
+              <Footer />
+              <ListModal />
+            </ListModalProvider>
+          </ListProvider>
+        </UserProvider>
 
         <ScrollRestoration />
         <Scripts />

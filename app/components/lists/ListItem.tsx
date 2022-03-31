@@ -1,6 +1,8 @@
 import { Link } from 'remix';
 import { PlusSmIcon, MinusSmIcon } from '@heroicons/react/solid';
 
+import { useListModalDispatch } from '~/hooks/useListModal';
+
 import type { ListItem as ListItemType } from '../../lib/format';
 import type { List } from '../../lib/api/types';
 
@@ -27,6 +29,9 @@ type ListItemProps = ListItemNoAction | ListItemAdd | ListItemRemove;
 
 // Component
 const ListItem = ({ showType = true, ...rest }: ListItemProps) => {
+  // Hooks
+  const listModalDispatch = useListModalDispatch();
+
   // Derived state
   const { tmdbId, type, poster, title, subTitle } = rest.item;
 
@@ -69,13 +74,12 @@ const ListItem = ({ showType = true, ...rest }: ListItemProps) => {
               ? ` bg-green-100 text-green-800 hover:bg-green-200 focus:ring-green-500`
               : ``)
           }
-          onClick={() => {
-            // TODO
-            // listModalDispatch({
-            //   type: 'SHOW_ADD_MODAL',
-            //   item: rest.item,
-            // })
-          }}
+          onClick={() =>
+            listModalDispatch({
+              type: 'SHOW_ADD_MODAL',
+              item: rest.item,
+            })
+          }
         >
           <PlusSmIcon className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -92,14 +96,13 @@ const ListItem = ({ showType = true, ...rest }: ListItemProps) => {
               ? ` bg-green-100 text-green-800 hover:bg-green-200 focus:ring-green-500`
               : ``)
           }
-          onClick={() => {
-            // TODO
-            // listModalDispatch({
-            //   type: 'SHOW_REMOVE_MODAL',
-            //   list: rest.list,
-            //   item: rest.item,
-            // });
-          }}
+          onClick={() =>
+            listModalDispatch({
+              type: 'SHOW_REMOVE_MODAL',
+              list: rest.list,
+              item: rest.item,
+            })
+          }
         >
           <MinusSmIcon className="h-5 w-5" aria-hidden="true" />
         </button>

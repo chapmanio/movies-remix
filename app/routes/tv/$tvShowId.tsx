@@ -10,6 +10,7 @@ import type { ExtShowResponse } from '../../lib/api';
 import { getTvShow, getTvCredits } from '../../lib/api/tvShow';
 import { formatRuntime, formatShortDate, formatYear } from '../../lib/dates';
 import { formatTvShow } from '../../lib/format';
+import { useListModalDispatch } from '~/hooks/useListModal';
 
 // Types
 type LoaderData = {
@@ -59,6 +60,7 @@ export const meta: MetaFunction = ({ data }) => {
 export default function TvShow() {
   // Hooks
   const { tvShow, credits } = useLoaderData<LoaderData>();
+  const listModalDispatch = useListModalDispatch();
 
   // Render
   return (
@@ -123,13 +125,12 @@ export default function TvShow() {
                 <button
                   type="button"
                   className="ml-6 inline-flex items-center rounded-md border border-transparent bg-fuchsia-100 py-2 pl-4 pr-5 text-sm font-medium text-fuchsia-700 shadow-sm hover:bg-fuchsia-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 focus:ring-offset-2 focus:ring-offset-fuchsia-700"
-                  onClick={() => {
-                    // TODO
-                    // listModalDispatch({
-                    //   type: 'SHOW_ADD_MODAL',
-                    //   item: formatTvShow(tvShow.data),
-                    // })
-                  }}
+                  onClick={() =>
+                    listModalDispatch({
+                      type: 'SHOW_ADD_MODAL',
+                      item: formatTvShow(tvShow),
+                    })
+                  }
                 >
                   <PlusSmIcon className="mr-2 -ml-1 h-5 w-5" />
                   Add to list

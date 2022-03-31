@@ -10,6 +10,7 @@ import ListItem from '~/components/lists/ListItem';
 import { formatAge } from '../../lib/dates';
 import { getPerson, getPersonCredits } from '../../lib/api/person';
 import { formatPerson, formatPersonCredits, ListItem as ListItemType } from '../../lib/format';
+import { useListModalDispatch } from '~/hooks/useListModal';
 
 // Types
 type LoaderData = {
@@ -61,6 +62,7 @@ export const meta: MetaFunction = ({ data }) => {
 export default function Person() {
   // Hooks
   const { person, credits } = useLoaderData<LoaderData>();
+  const listModalDispatch = useListModalDispatch();
 
   // Local state
   const [showMore, setShowMore] = useState(false);
@@ -119,13 +121,12 @@ export default function Person() {
             <div className="mt-6">
               <button
                 className="inline-flex items-center rounded-md border border-transparent bg-green-100 py-2 pl-4 pr-5 text-sm font-medium text-green-700 shadow-sm hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-700"
-                onClick={() => {
-                  // TODO
-                  // listModalDispatch({
-                  //   type: 'SHOW_ADD_MODAL',
-                  //   item: formatPerson(person),
-                  // })
-                }}
+                onClick={() =>
+                  listModalDispatch({
+                    type: 'SHOW_ADD_MODAL',
+                    item: formatPerson(person),
+                  })
+                }
               >
                 <PlusSmIcon className="mr-2 -ml-1 h-5 w-5" />
                 Add to list

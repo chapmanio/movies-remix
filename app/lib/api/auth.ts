@@ -35,8 +35,8 @@ export type UpdateParams = {
 };
 
 // Handlers
-export const authUser = async () => {
-  return apiFetch<AuthUser>(`/auth`);
+export const authUser = async (headers?: HeadersInit) => {
+  return apiFetch<AuthUser>(`/auth`, { headers });
 };
 
 export const registerUser = async ({ name, email, password }: RegisterParams) => {
@@ -62,15 +62,13 @@ export const updateUser = async ({ name, email, password }: UpdateParams) => {
 };
 
 export const deleteUser = async (email: string) => {
-  await apiRaw(`/auth/delete/${email}`, {
-    method: 'POST',
-  });
+  await apiRaw(`/auth/delete/${email}`, { method: 'POST' });
 
   return;
 };
 
 export const signIn = async ({ email, password }: SignInParams) => {
-  return apiFetch<User>(`/auth/sign-in`, {
+  return apiRaw(`/auth/sign-in`, {
     method: 'POST',
     body: JSON.stringify({
       email,
@@ -80,5 +78,5 @@ export const signIn = async ({ email, password }: SignInParams) => {
 };
 
 export const signOut = async () => {
-  return apiFetch<void>(`/auth/sign-out`, { method: 'POST' });
+  return apiRaw(`/auth/sign-out`, { method: 'POST' });
 };
