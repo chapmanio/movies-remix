@@ -27,6 +27,7 @@ export interface ExtShowResponse extends ShowResponse {
 
 // Helpers
 const buildHttpError = async (response: Response): Promise<ApiError> => {
+  // TODO: Change this?
   const responseText = await response.text();
 
   const error = new Error(responseText) as ApiError;

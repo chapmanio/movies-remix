@@ -43,13 +43,16 @@ export const action: ActionFunction = async ({ request }) => {
     const response = await signIn({ email, password });
 
     if (!response.ok) {
+      // TODO HANDLE THIS
       console.log(response);
     }
 
-    // TODO: Can we update global state before we bounce along?
-
     // Bounce home with cookie headers from api
-    return redirect('/', { headers: response.headers });
+    const headers = new Headers();
+
+    headers.set('Set-Cookie', response.headers.get('Set-Cookie') || '');
+
+    return redirect('/', { headers });
   } catch (error) {
     const apiError = error as ApiError;
 
@@ -99,7 +102,7 @@ export default function SignIn() {
         {/* TODO */}
         {error ? <Alert type="error" message={error} onClose={() => setError(undefined)} /> : null}
 
-        <Form method="post" className="mt-8 space-y-6">
+        <Form method="post" reloadDocument className="mt-8 space-y-6">
           <div className="-space-y-px rounded-md shadow-sm">
             <div>
               <label htmlFor="email-address" className="sr-only">
