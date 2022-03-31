@@ -1,5 +1,5 @@
+import { Link } from 'remix';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import Modal from '../assets/Modal';
 import Alert from '../assets/Alert';
@@ -18,7 +18,6 @@ type NotificationType = Omit<NotificationProps, 'onClose'>;
 // Component
 const ListModal = () => {
   // Hooks
-  const navigate = useNavigate();
   const userState = useUserState();
   const listState = useListState();
   const listDispatch = useListDispatch();
@@ -182,12 +181,6 @@ const ListModal = () => {
     }
   };
 
-  const handleSignedOut = () => {
-    listModalDispatch({ type: 'HIDE_MODAL' });
-
-    navigate('/sign-in');
-  };
-
   // Render
   return (
     <>
@@ -344,13 +337,13 @@ const ListModal = () => {
               ) : (
                 <p className="mt-5 text-red-600">
                   You must be{' '}
-                  <button
-                    type="button"
+                  <Link
+                    to="/sign-in"
                     className="underline hover:text-red-700"
-                    onClick={handleSignedOut}
+                    onClick={() => listModalDispatch({ type: 'HIDE_MODAL' })}
                   >
                     signed in
-                  </button>{' '}
+                  </Link>{' '}
                   to{' '}
                   {listModalState.operation === 'add'
                     ? `add to`

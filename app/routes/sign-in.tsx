@@ -99,7 +99,7 @@ export default function SignIn() {
         {/* TODO */}
         {error ? <Alert type="error" message={error} onClose={() => setError(undefined)} /> : null}
 
-        <Form method="post" reloadDocument className="mt-8 space-y-6">
+        <Form method="post" className="mt-8 space-y-6">
           <div className="-space-y-px rounded-md shadow-sm">
             <div>
               <label htmlFor="email-address" className="sr-only">
