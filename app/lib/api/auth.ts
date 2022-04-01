@@ -1,5 +1,4 @@
 import { apiFetch, apiRaw } from '../api';
-import type { User } from './types';
 
 // Types
 type UnauthenticatedUser = {
@@ -50,21 +49,23 @@ export const registerUser = async ({ name, email, password }: RegisterParams) =>
   });
 };
 
-export const updateUser = async ({ name, email, password }: UpdateParams) => {
-  return apiFetch<User>(`/auth/account/${email}`, {
+export const updateUser = async (
+  { name, email, password }: UpdateParams,
+  headers?: HeadersInit
+) => {
+  return apiRaw(`/auth/account/${email}`, {
     method: 'POST',
     body: JSON.stringify({
       name,
       email,
       password,
     }),
+    headers,
   });
 };
 
-export const deleteUser = async (email: string) => {
-  await apiRaw(`/auth/delete/${email}`, { method: 'POST' });
-
-  return;
+export const deleteUser = async (email: string, headers?: HeadersInit) => {
+  return await apiRaw(`/auth/delete/${email}`, { method: 'POST', headers });
 };
 
 export const signIn = async ({ email, password }: SignInParams) => {

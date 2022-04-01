@@ -152,7 +152,7 @@ export default function DetailsHeader() {
                       role="menuitem"
                       tabIndex={-1}
                       id="user-menu-item-0"
-                      className="lock py-2 px-4 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       My account
                     </Link>
