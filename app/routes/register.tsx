@@ -1,9 +1,19 @@
-import { ActionFunction, Form, json, Link, MetaFunction, redirect, useActionData } from 'remix';
+import {
+  ActionFunction,
+  Form,
+  json,
+  Link,
+  LoaderFunction,
+  MetaFunction,
+  redirect,
+  useActionData,
+} from 'remix';
 import { useState } from 'react';
 
 import Alert from '~/components/assets/Alert';
 import HomeHeader from '~/components/layout/HomeHeader';
 
+import { authUser } from '~/lib/api/auth';
 import { registerUser } from '~/lib/api/auth';
 import type { ApiError } from '~/lib/api';
 
@@ -21,6 +31,23 @@ export const meta: MetaFunction = () => {
   return {
     title: `Create account • Movies`,
   };
+};
+
+export const loader: LoaderFunction = async ({ request }) => {
+  // Is a user logged in already?
+  const headers = new Headers();
+
+  headers.set('Cookie', request.headers.get('Cookie') || '');
+
+  try {
+    const user = await authUser(headers);
+
+    if (user.auth) {
+      return redirect('/');
+    }
+  } catch (error) {
+    redirect('/');
+  }
 };
 
 export const action: ActionFunction = async ({ request }) => {

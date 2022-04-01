@@ -1,11 +1,20 @@
-import { ActionFunction, Form, json, Link, MetaFunction, redirect, useActionData } from 'remix';
+import {
+  ActionFunction,
+  Form,
+  json,
+  Link,
+  LoaderFunction,
+  MetaFunction,
+  redirect,
+  useActionData,
+} from 'remix';
 import { useState } from 'react';
 import { LockClosedIcon } from '@heroicons/react/solid';
 
 import Alert from '~/components/assets/Alert';
 import HomeHeader from '~/components/layout/HomeHeader';
 
-import { signIn } from '~/lib/api/auth';
+import { authUser, signIn } from '~/lib/api/auth';
 import type { ApiError } from '~/lib/api';
 
 // Types
@@ -22,6 +31,25 @@ export const meta: MetaFunction = () => {
   return {
     title: `Sign In • Movies`,
   };
+};
+
+export const loader: LoaderFunction = async ({ request }) => {
+  // Is a user logged in already?
+  const headers = new Headers();
+
+  headers.set('Cookie', request.headers.get('Cookie') || '');
+
+  try {
+    const user = await authUser(headers);
+
+    if (user.auth) {
+      return redirect('/');
+    }
+  } catch (error) {
+    return redirect('/');
+  }
+
+  return new Response();
 };
 
 export const action: ActionFunction = async ({ request }) => {
