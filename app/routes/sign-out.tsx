@@ -10,10 +10,12 @@ export const action: ActionFunction = async () => {
     console.log(response);
   }
 
-  // TODO: Can we update global state before we bounce along?
-
   // Bounce home with cookie headers from api
-  return redirect('/', { headers: response.headers });
+  const headers = new Headers();
+
+  headers.set('Set-Cookie', response.headers.get('Set-Cookie') || '');
+
+  return redirect('/', { headers });
 };
 
 export const loader: LoaderFunction = async () => {
