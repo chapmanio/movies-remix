@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { XIcon } from '@heroicons/react/outline';
 
@@ -21,6 +21,9 @@ type ModalProps = CloseableModal | UncloseableModal;
 
 // Component
 const Modal: React.FC<ModalProps> = (props) => {
+  // Local state
+  const [isMounted, setIsMounted] = useState(false);
+
   // Refs
   const isActiveRef = useRef(false);
 
@@ -35,6 +38,10 @@ const Modal: React.FC<ModalProps> = (props) => {
   );
 
   // Effects
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   useEffect(() => {
     if (props.visible && !isActiveRef.current) {
       isActiveRef.current = true;
@@ -60,7 +67,7 @@ const Modal: React.FC<ModalProps> = (props) => {
   }, [props, escape]);
 
   // Render
-  if (typeof document === 'undefined') {
+  if (!isMounted) {
     return null;
   }
 
