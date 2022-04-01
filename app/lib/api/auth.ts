@@ -40,7 +40,7 @@ export const authUser = async (headers?: HeadersInit) => {
 };
 
 export const registerUser = async ({ name, email, password }: RegisterParams) => {
-  return apiFetch<User>(`/auth/register`, {
+  return apiRaw(`/auth/register`, {
     method: 'POST',
     body: JSON.stringify({
       name,
