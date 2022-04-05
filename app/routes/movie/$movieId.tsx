@@ -77,7 +77,7 @@ export default function Movie() {
         <div className="bg-theme-movie">
           <div className="mx-auto max-w-7xl items-center px-4 py-8 sm:flex sm:px-6 lg:px-8">
             <div className="flex-none self-start sm:w-[300px]">
-              <div className="aspect-w-2 aspect-h-3 overflow-hidden rounded-lg">
+              <div className="aspect-2/3 overflow-hidden rounded-lg">
                 {movie.poster_path ? (
                   <img
                     src={`https://www.themoviedb.org/t/p/w300_and_h450_bestv2${movie.poster_path}`}

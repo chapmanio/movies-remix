@@ -110,7 +110,7 @@ const ListItem = ({ showType = true, ...rest }: ListItemProps) => {
 
       <Link
         to={`/${type}/${tmdbId}`}
-        className="aspect-w-2 aspect-h-3 group block w-full overflow-hidden rounded-lg bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100"
+        className="group block aspect-2/3 w-full overflow-hidden rounded-lg bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100"
         prefetch="intent"
       >
         {/* TODO: Flicker */}

@@ -193,7 +193,7 @@ const ListModal = () => {
         {listModalState.item && listModalState.operation ? (
           <div className="flex flex-col items-center space-y-6 sm:flex-row sm:space-x-6 sm:space-y-0">
             <div className="w-36">
-              <div className="aspect-w-2 aspect-h-3 block w-full overflow-hidden rounded-lg bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100">
+              <div className="block aspect-2/3 w-full overflow-hidden rounded-lg bg-gray-100 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 focus-within:ring-offset-gray-100">
                 {listModalState.item.poster && (
                   <img
                     src={`https://www.themoviedb.org/t/p/w220_and_h330_face${listModalState.item.poster}`}
