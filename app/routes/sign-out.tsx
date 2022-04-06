@@ -7,6 +7,7 @@ export const action: ActionFunction = async () => {
   const response = await signOut();
 
   if (!response.ok) {
+    // TODO: Handle this
     console.log(response);
   }
 

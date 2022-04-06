@@ -54,7 +54,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
     return json({ authUser: user });
   } catch (error) {
-    redirect('/sign-in');
+    return redirect('/sign-in');
   }
 };
 
@@ -87,8 +87,6 @@ export const action: ActionFunction = async ({ request }) => {
     name,
     email,
   };
-
-  console.log(action);
 
   switch (action) {
     case 'update': {

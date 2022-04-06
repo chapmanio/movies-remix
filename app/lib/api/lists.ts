@@ -30,30 +30,31 @@ export const getList = async (slug: string) => {
   return apiFetch<List>(`/list/${slug}`);
 };
 
-export const addList = async (name: string) => {
+export const addList = async (name: string, headers?: HeadersInit) => {
   return apiFetch<List>(`/list`, {
     method: 'POST',
+    headers,
     body: JSON.stringify({
       name,
     }),
   });
 };
 
-export const updateList = async ({ slug, name }: UpdateListArgs) => {
+export const updateList = async ({ slug, name }: UpdateListArgs, headers?: HeadersInit) => {
   return apiFetch<List>(`/list/${slug}`, {
     method: 'POST',
+    headers,
     body: JSON.stringify({
       name,
     }),
   });
 };
 
-export const deleteList = async (slug: string) => {
-  await apiRaw(`/list/delete/${slug}`, {
+export const deleteList = async (slug: string, headers?: HeadersInit) => {
+  return apiFetch<List>(`/list/delete/${slug}`, {
     method: 'POST',
+    headers,
   });
-
-  return;
 };
 
 export const addListItem = async ({

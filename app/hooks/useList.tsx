@@ -13,7 +13,7 @@ type ListAction =
   | { type: 'SET_SELECTED_LIST'; id: string }
   | { type: 'CLEAR_SELECTED_LIST' };
 
-type ListState = { lists: List[] | undefined; selectedId?: string };
+type ListState = { lists: List[]; selectedId?: string };
 type ListDispatch = (action: ListAction) => void;
 
 // Context

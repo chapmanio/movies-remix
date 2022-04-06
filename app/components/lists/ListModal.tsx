@@ -15,6 +15,8 @@ import { addList, addListItem, deleteListItem } from '../../lib/api/lists';
 // Types
 type NotificationType = Omit<NotificationProps, 'onClose'>;
 
+// TODO: Get lists client side if not in global state already
+
 // Component
 const ListModal = () => {
   // Hooks
@@ -34,6 +36,17 @@ const ListModal = () => {
   const [notification, setNotification] = useState<NotificationType | undefined>(undefined);
 
   // Effects
+  useEffect(() => {
+    if (listState.lists && listState.lists.length > 0) {
+      // Preselect list based on state
+      const selectedList = listState.selectedId
+        ? listState.lists.find((list) => list.id === listState.selectedId)
+        : undefined;
+
+      setList(selectedList ? selectedList.id : listState.lists[0].id);
+    }
+  }, [listDispatch, listState]);
+
   useEffect(() => {
     if (listState.lists && listState.lists.length > 0) {
       const selectedList = listState.selectedId
@@ -243,7 +256,12 @@ const ListModal = () => {
                 <>
                   {listModalState.operation === 'add' ? (
                     <div className="mt-6">
-                      {listState.lists && listState.lists.length > 0 ? (
+                      {listState.lists === undefined ? (
+                        <div className="flex space-x-2">
+                          <div className="h-9 w-2/3 animate-pulse rounded-md bg-gray-100" />
+                          <div className="h-9 w-1/3 animate-pulse rounded-md bg-gray-100" />
+                        </div>
+                      ) : listState.lists && listState.lists.length > 0 ? (
                         <form className="flex space-x-2" onSubmit={handleAddToList}>
                           <select
                             id="list"

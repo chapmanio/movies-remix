@@ -20,15 +20,15 @@ import { ListModalProvider } from './hooks/useListModal';
 import { UserProvider } from './hooks/useUser';
 
 import { authUser, AuthUser } from './lib/api/auth';
-import { getAllLists } from './lib/api/lists';
 import type { List } from './lib/api/types';
+import { getAllLists } from './lib/api/lists';
 
 import styles from './tailwind.css';
 
 // Types
 type LoaderData = {
   authUser: AuthUser;
-  lists: List[] | undefined;
+  lists: List[];
 };
 
 // Remix
@@ -47,8 +47,8 @@ export const loader: LoaderFunction = async ({ request }) => {
     user = { auth: false };
   }
 
-  // Get lists if logged in
-  let lists: List[] | undefined;
+  // Get user lists
+  let lists: List[] = [];
 
   if (user.auth) {
     lists = await getAllLists(headers);
