@@ -24,6 +24,7 @@ import type { List } from './lib/api/types';
 import { getAllLists } from './lib/api/lists';
 
 import styles from './tailwind.css';
+import { useEffect } from 'react';
 
 // Types
 type LoaderData = {
@@ -101,6 +102,9 @@ export const meta: MetaFunction = () => ({
 export default function App() {
   // Hooks
   const { authUser, lists } = useLoaderData<LoaderData>();
+
+  // Effects
+  useEffect(() => {}, []);
 
   // Render
   return (

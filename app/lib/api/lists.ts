@@ -8,7 +8,7 @@ type UpdateListArgs = {
 };
 
 type AddListItemArgs = {
-  listId: string;
+  listSlug: string;
   mediaType: string;
   tmdbId: number;
   title: string;
@@ -16,8 +16,13 @@ type AddListItemArgs = {
   posterUrl?: string;
 };
 
+type GetListItemArgs = {
+  listSlug: string;
+  listItemId: string;
+};
+
 type DeleteListItemArgs = {
-  listId: string;
+  listSlug: string;
   listItemId: string;
 };
 
@@ -26,8 +31,8 @@ export const getAllLists = async (headers?: HeadersInit) => {
   return apiFetch<List[]>(`/list`, { headers });
 };
 
-export const getList = async (slug: string) => {
-  return apiFetch<List>(`/list/${slug}`);
+export const getList = async (slug: string, headers?: HeadersInit) => {
+  return apiFetch<List>(`/list/${slug}`, { headers });
 };
 
 export const addList = async (name: string, headers?: HeadersInit) => {
@@ -57,16 +62,20 @@ export const deleteList = async (slug: string, headers?: HeadersInit) => {
   });
 };
 
-export const addListItem = async ({
-  listId,
-  mediaType,
-  tmdbId,
-  title,
-  subtitle,
-  posterUrl,
-}: AddListItemArgs) => {
-  return apiFetch<ListItem>(`/list-item/${listId}`, {
+export const getListItem = async (
+  { listSlug, listItemId }: GetListItemArgs,
+  headers?: HeadersInit
+) => {
+  return apiFetch<ListItem>(`/list-item/${listSlug}/${listItemId}`, { headers });
+};
+
+export const addListItem = async (
+  { listSlug, mediaType, tmdbId, title, subtitle, posterUrl }: AddListItemArgs,
+  headers?: HeadersInit
+) => {
+  return apiFetch<ListItem>(`/list-item/${listSlug}`, {
     method: 'POST',
+    headers,
     body: JSON.stringify({
       mediaType,
       tmdbId,
@@ -77,9 +86,13 @@ export const addListItem = async ({
   });
 };
 
-export const deleteListItem = async ({ listId, listItemId }: DeleteListItemArgs) => {
-  await apiRaw(`/list-item/${listId}/delete/${listItemId}`, {
+export const deleteListItem = async (
+  { listSlug, listItemId }: DeleteListItemArgs,
+  headers?: HeadersInit
+) => {
+  await apiRaw(`/list-item/${listSlug}/delete/${listItemId}`, {
     method: 'POST',
+    headers,
   });
 
   return;

@@ -212,7 +212,7 @@ export default function Lists() {
         if (actionData.list) {
           listDispatch({
             type: 'UPDATE_LIST',
-            id: actionData.list.id,
+            slug: actionData.list.slug,
             list: actionData.list,
           });
         }
@@ -222,7 +222,7 @@ export default function Lists() {
         if (actionData.list) {
           listDispatch({
             type: 'REMOVE_LIST',
-            id: actionData.list.id,
+            slug: actionData.list.slug,
           });
         }
 
@@ -256,6 +256,8 @@ export default function Lists() {
   };
 
   // Render
+  console.log('render', listState.lists);
+
   return (
     <>
       <DetailsHeader />

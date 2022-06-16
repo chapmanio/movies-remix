@@ -1,4 +1,4 @@
-import { Link } from 'remix';
+import { Link, useFetcher } from 'remix';
 import { useEffect, useState } from 'react';
 
 import Modal from '../assets/Modal';
@@ -9,17 +9,16 @@ import { useUserState } from '../../hooks/useUser';
 import { useListState, useListDispatch } from '../../hooks/useList';
 import { useListModalDispatch, useListModalState } from '../../hooks/useListModal';
 
-import { ApiError } from '../../lib/api';
-import { addList, addListItem, deleteListItem } from '../../lib/api/lists';
+import { ActionData as ModalActionData } from '~/routes/lists/modal';
 
 // Types
 type NotificationType = Omit<NotificationProps, 'onClose'>;
 
-// TODO: Get lists client side if not in global state already
-
-// Component
+// React
 const ListModal = () => {
   // Hooks
+  const lists = useFetcher<ModalActionData>();
+
   const userState = useUserState();
   const listState = useListState();
   const listDispatch = useListDispatch();
@@ -27,67 +26,37 @@ const ListModal = () => {
   const listModalDispatch = useListModalDispatch();
 
   // Local state
-  const [list, setList] = useState<string | undefined>(undefined);
-  const [name, setName] = useState('');
-
-  const [submitLoading, setSubmitLoading] = useState(false);
-
   const [error, setError] = useState<string | undefined>(undefined);
   const [notification, setNotification] = useState<NotificationType | undefined>(undefined);
 
   // Effects
   useEffect(() => {
-    if (listState.lists && listState.lists.length > 0) {
-      // Preselect list based on state
-      const selectedList = listState.selectedId
-        ? listState.lists.find((list) => list.id === listState.selectedId)
-        : undefined;
-
-      setList(selectedList ? selectedList.id : listState.lists[0].id);
-    }
-  }, [listDispatch, listState]);
-
-  useEffect(() => {
-    if (listState.lists && listState.lists.length > 0) {
-      const selectedList = listState.selectedId
-        ? listState.lists.find((list) => list.id === listState.selectedId)
-        : undefined;
-
-      setList(selectedList ? selectedList.id : listState.lists[0].id);
-    }
-  }, [listState]);
-
-  useEffect(() => {
     if (listModalState.visible) {
-      setSubmitLoading(false);
       setNotification((notification) =>
         notification ? { ...notification, visible: false } : undefined
       );
     }
   }, [listModalState.visible]);
 
-  // Handlers
-  const handleAddList = () => {
-    setSubmitLoading(true);
+  useEffect(() => {
+    // TODO: How do we make this only run after submit is pressed and no other times?
+    // Do we have to programtically submit so we can change a ref to true/false
 
-    // First, add the list
-    if (listModalState.visible && listModalState.operation === 'add') {
-      const { tmdbId, title, type, poster, subTitle } = listModalState.item;
+    if (lists.type === 'done') {
+      if (lists.data.error) {
+        setError(lists.data.error);
+      } else {
+        console.log('HERE!!');
+        console.log(lists.data.action);
 
-      addList(name)
-        .then((newList) => {
-          listDispatch({ type: 'ADD_LIST', list: newList });
-
-          addListItem({
-            listId: newList.id,
-            mediaType: type.toUpperCase(), // TODO: type safety?
-            tmdbId,
-            title,
-            subtitle: subTitle,
-            posterUrl: poster,
-          })
-            .then((listItem) => {
-              listDispatch({ type: 'ADD_LIST_ITEM', id: newList.id, item: listItem });
+        switch (lists.data.action) {
+          case 'addItem':
+            if (lists.data.list && lists.data.listItem) {
+              listDispatch({
+                type: 'ADD_LIST_ITEM',
+                slug: lists.data.list.slug,
+                item: lists.data.listItem,
+              });
 
               setNotification({
                 type: 'success',
@@ -96,103 +65,60 @@ const ListModal = () => {
               });
 
               listModalDispatch({ type: 'HIDE_MODAL' });
-            })
-            .catch((error: ApiError) => {
-              setSubmitLoading(false);
-              setError(error.message);
-            });
-        })
-        .catch((error: ApiError) => {
-          if (error.status === 422) {
-            setSubmitLoading(false);
-            setError('A list with this name already exists');
-          } else {
-            setSubmitLoading(false);
-            setError(error.message);
-          }
-        });
+            } else {
+              setError('Something went wrong!');
+            }
+
+            break;
+          case 'addList':
+            if (lists.data.list && lists.data.listItem) {
+              listDispatch({ type: 'ADD_LIST', list: lists.data.list });
+              listDispatch({
+                type: 'ADD_LIST_ITEM',
+                slug: lists.data.list.slug,
+                item: lists.data.listItem,
+              });
+
+              setNotification({
+                type: 'success',
+                title: 'Added to list',
+                visible: true,
+              });
+
+              listModalDispatch({ type: 'HIDE_MODAL' });
+            } else {
+              setError('Something went wrong!');
+            }
+
+            break;
+          case 'removeItem':
+            if (lists.data.list && lists.data.listItem) {
+              listDispatch({
+                type: 'REMOVE_LIST_ITEM',
+                slug: lists.data.list.slug,
+                itemId: lists.data.listItem.id,
+              });
+
+              setNotification({
+                type: 'success',
+                title: 'Removed from list',
+                visible: true,
+              });
+
+              listModalDispatch({ type: 'HIDE_MODAL' });
+            } else {
+              setError('Something went wrong!');
+            }
+
+            break;
+          default:
+            setError('Something went wrong!');
+
+            break;
+        }
+      }
     }
-  };
-
-  const handleAddToList = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    setSubmitLoading(true);
-
-    if (list && listModalState.visible && listModalState.operation === 'add') {
-      const { tmdbId, title, type, poster, subTitle } = listModalState.item;
-
-      addListItem({
-        listId: list,
-        mediaType: type.toUpperCase(), // TODO: type safety?
-        tmdbId,
-        title,
-        subtitle: subTitle,
-        posterUrl: poster,
-      })
-        .then((listItem) => {
-          listDispatch({ type: 'ADD_LIST_ITEM', id: list, item: listItem });
-
-          setNotification({
-            type: 'success',
-            title: 'Added to list',
-            visible: true,
-          });
-
-          listModalDispatch({ type: 'HIDE_MODAL' });
-        })
-        .catch((error: ApiError) => {
-          if (error.status === 422) {
-            setNotification({
-              type: 'info',
-              title: 'Item already added to list',
-              visible: true,
-            });
-
-            listModalDispatch({ type: 'HIDE_MODAL' });
-          } else {
-            setSubmitLoading(false);
-            setError('Unable to add to list');
-          }
-        });
-    }
-  };
-
-  const handleRemoveFromList = () => {
-    setSubmitLoading(true);
-
-    if (
-      listModalState.visible &&
-      listModalState.operation === 'remove' &&
-      listModalState.item.dbId
-    ) {
-      const { dbId } = listModalState.item;
-
-      deleteListItem({
-        listId: listModalState.list.id,
-        listItemId: dbId,
-      })
-        .then(() => {
-          listDispatch({
-            type: 'REMOVE_LIST_ITEM',
-            id: listModalState.list.id,
-            itemId: dbId,
-          });
-
-          setNotification({
-            type: 'success',
-            title: 'Removed from list',
-            visible: true,
-          });
-
-          listModalDispatch({ type: 'HIDE_MODAL' });
-        })
-        .catch((error: ApiError) => {
-          setSubmitLoading(false);
-          setError(error.message);
-        });
-    }
-  };
+  }, [listDispatch, listModalDispatch, lists]);
 
   // Render
   return (
@@ -253,7 +179,17 @@ const ListModal = () => {
               ) : null}
 
               {userState.auth ? (
-                <>
+                <lists.Form method="post" action="/lists/modal">
+                  <input
+                    type="hidden"
+                    name="mediaType"
+                    value={listModalState.item.type.toUpperCase()}
+                  />
+                  <input type="hidden" name="tmdbId" value={listModalState.item.tmdbId} />
+                  <input type="hidden" name="title" value={listModalState.item.title} />
+                  <input type="hidden" name="subtitle" value={listModalState.item.subTitle || ''} />
+                  <input type="hidden" name="posterUrl" value={listModalState.item.poster || ''} />
+
                   {listModalState.operation === 'add' ? (
                     <div className="mt-6">
                       {listState.lists === undefined ? (
@@ -262,16 +198,15 @@ const ListModal = () => {
                           <div className="h-9 w-1/3 animate-pulse rounded-md bg-gray-100" />
                         </div>
                       ) : listState.lists && listState.lists.length > 0 ? (
-                        <form className="flex space-x-2" onSubmit={handleAddToList}>
+                        <div className="flex space-x-2">
                           <select
                             id="list"
-                            name="list"
+                            name="listSlug"
                             className="block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                            value={list}
-                            onChange={(event) => setList(event.target.value)}
+                            defaultValue={lists.data?.list?.slug ?? listModalState.list?.slug}
                           >
                             {listState.lists.map((list) => (
-                              <option key={list.id} value={list.id}>
+                              <option key={list.slug} value={list.id}>
                                 {list.name}
                               </option>
                             ))}
@@ -279,79 +214,89 @@ const ListModal = () => {
 
                           <button
                             type="submit"
+                            name="action"
+                            value="addItem"
                             className={
                               `flex-none rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2` +
-                              (submitLoading ? ` opacity-75` : ` hover:bg-indigo-700`)
+                              (lists.state === 'submitting'
+                                ? ` opacity-75`
+                                : ` hover:bg-indigo-700`)
                             }
-                            disabled={submitLoading}
+                            disabled={lists.state === 'submitting'}
                           >
-                            {submitLoading ? `Please wait...` : `Add to list`}
+                            {lists.state === 'submitting' ? `Please wait...` : `Add to list`}
                           </button>
-                        </form>
+                        </div>
                       ) : (
                         <div className="flex space-x-2">
                           <div className="w-full">
-                            <label htmlFor="email" className="sr-only">
-                              Email
+                            <label htmlFor="listName" className="sr-only">
+                              List name
                             </label>
                             <input
                               type="text"
-                              name="name"
-                              id="name"
+                              id="listName"
+                              name="listName"
                               className="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                               placeholder="List name"
-                              value={name}
-                              onChange={(e) => setName(e.target.value)}
+                              defaultValue={lists.data?.fields?.listName ?? ''}
                             />
                           </div>
 
                           <button
-                            type="button"
+                            type="submit"
+                            name="action"
+                            value="addList"
                             className={
                               `flex-none rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2` +
-                              (submitLoading ? ` opacity-75` : ` hover:bg-indigo-700`)
+                              (lists.state === 'submitting'
+                                ? ` opacity-75`
+                                : ` hover:bg-indigo-700`)
                             }
-                            disabled={submitLoading}
-                            onClick={handleAddList}
+                            disabled={lists.state === 'submitting'}
                           >
-                            {submitLoading ? `Please wait...` : `Create list`}
+                            {lists.state === 'submitting' ? `Please wait...` : `Create list`}
                           </button>
                         </div>
                       )}
                     </div>
                   ) : listModalState.operation === 'remove' && listModalState.list ? (
                     <>
+                      <input type="hidden" name="listId" value={listModalState.list.id} />
+                      <input type="hidden" name="listItemId" value={listModalState.item.dbId} />
+
                       <p className="mt-5 text-gray-600">
                         Remove from <span className="font-bold">{listModalState.list.name}</span>?
                       </p>
 
                       <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                         <button
-                          type="button"
+                          type="submit"
+                          name="action"
+                          value="removeItem"
                           className={
                             `inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm` +
-                            (submitLoading ? ` opacity-75` : ` hover:bg-red-700`)
+                            (lists.state === 'submitting' ? ` opacity-75` : ` hover:bg-red-700`)
                           }
-                          onClick={handleRemoveFromList}
-                          disabled={submitLoading}
+                          disabled={lists.state === 'submitting'}
                         >
-                          {submitLoading ? `Please wait...` : `Remove`}
+                          {lists.state === 'submitting' ? `Please wait...` : `Remove`}
                         </button>
                         <button
                           type="button"
                           className={
                             `mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm` +
-                            (submitLoading ? ` opacity-75` : ` hover:bg-gray-50`)
+                            (lists.state === 'submitting' ? ` opacity-75` : ` hover:bg-gray-50`)
                           }
                           onClick={() => listModalDispatch({ type: 'HIDE_MODAL' })}
-                          disabled={submitLoading}
+                          disabled={lists.state === 'submitting'}
                         >
                           Cancel
                         </button>
                       </div>
                     </>
                   ) : null}
-                </>
+                </lists.Form>
               ) : (
                 <p className="mt-5 text-red-600">
                   You must be{' '}
